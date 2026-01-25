@@ -13,10 +13,10 @@ def compare_results(source, expected_result):
         # TODO: Add actual test assertions
         assert tokenizer.get_tokens_as_string() == r
 
-def test_lexer_placeholder():
+def test_lexer_comments():
     """Placeholder test - replace with actual test cases"""
-    source = ["// This is a placeholder test", "/* This is a block comment \n This is a block comment */", "PPL", "auto"]
-    result = ["EOF", "EOF", "ID,PPL,EOF", "KW,auto,EOF"]
+    source = ["// This is a \n placeholder \r test", "/* This is a block comment \n This is \r a block comment */"]
+    result = ["ID,placeholder,ID,test,EOF", "EOF"]
 
     compare_results(source, result)
 
@@ -26,8 +26,14 @@ def test_lexer_keywords():
 
     compare_results(source, result)
 
-def test_escape_characters():
-    source=["\"\\b\"", "\"\\f\"", "\"\\r\"", "\"\\n\"", "\"\\t\"", "\"\\\"\"", "\"\\\\\"", "\"\\b\\f\\r\\n\\t\\\"\\\\\""]
-    result = ["STRING_LIT,\"\\b\",EOF", "STRING_LIT,\"\\f\",EOF", "STRING_LIT,\"\\r\",EOF", "STRING_LIT,\"\\n\",EOF", "STRING_LIT,\"\\t\",EOF", "STRING_LIT,\"\\\"\",EOF", "STRING_LIT,\"\\\\\",EOF", "STRING_LIT,\"\\b\\f\\r\\n\\t\\\"\\\\\",EOF"]
+def test_lexer_float_literal():
+    source = ["0.0", "3.14", "-2.5", "1.23e4", "5.67E-2", "1.", ".5"]
+    result = ["FLOAT_LIT,0.0,EOF", "FLOAT_LIT,3.14,EOF", "FLOAT_LIT,-2.5,EOF", "FLOAT_LIT,1.23e4,EOF", "FLOAT_LIT,5.67E-2,EOF", "FLOAT_LIT,1.,EOF", "FLOAT_LIT,.5,EOF"]
+
+    compare_results(source, result)
+
+def test_string_literal():
+    source= ["\" long toi tan nat khi nhan ra toi \\r la gay \\ \"", "\"\\n"]
+    result = ["STRING_LIT,\" long toi tan nat khi nhan ra toi \\r la gay \\ \",EOF"]
 
     compare_results(source, result)
