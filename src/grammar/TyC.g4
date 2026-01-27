@@ -35,7 +35,7 @@ LINE_CMT: '//' ~('\n' | '\r')* -> skip ;
 
 KW: 'auto' | 'break' | 'case' | 'continue' | 'default' | 'else' | 'float' | 'for' | 'if' | 'int' | 'return' | 'string' | 'struct' | 'switch' | 'void' | 'while' ;
 
-ID: [a-zA-Z_]  [a-zA-Z0-9_]* ;
+ID: [a-zA-Z_] [a-zA-Z0-9_]* ;
 
 OP: ('+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||' | '!' | '++' | '--' | '.' | '=') ;
 
@@ -45,10 +45,12 @@ INT_LIT: '0' | ('-'? [1-9] [0-9]*);
 
 FLOAT_LIT: (('0'? '.' [0-9]+) | ('0.' [0-9]+ [eE] '-'? [1-9] [0-9]*)) | ('-'? [1-9] [0-9]* '.' ([0-9]+ ([eE] '-'? [1-9] [0-9]*)? )?) ;
 
-ESC: ('\\b' | '\\f' | '\\r' | '\\n' | '\\t' | '\\"' | '\\\\') ;
+fragment ESC_SEQ: '\\' [bfrnt"\\] ;
 
-STRING_LIT: '"' (ESC | .)*? '"' ;
+STRING_LIT: '"' ( (ESC_SEQ) | (~[\\\n\r]) )*? '"' { self.text = self.text[1:-1] } ; // exclude '\\' so that if the string does not match any legal escape sequence, anything starts with '\\' will be treated as illegal escape
 
-ERROR_CHAR: .;
-ILLEGAL_ESCAPE: .;
-UNCLOSE_STRING: .;
+ILLEGAL_ESCAPE: '"' ( ESC_SEQ | ~["\\\n\r] )*? '\\' ~[bfrnt"\\] { self.text = self.text[1:] } ;
+
+UNCLOSE_STRING: '"' ( ESC_SEQ | ~["\\\n\r] )*? ('\r' | '\n' | EOF) { self.text = self.text[1:] } ;
+
+ERROR_CHAR: . ;

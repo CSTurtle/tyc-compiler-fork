@@ -33,7 +33,7 @@ def test_lexer_float_literal():
     compare_results(source, result)
 
 def test_string_literal():
-    source= ["\" long toi tan nat khi nhan ra toi \\r la gay \\ \"", "\"\\n"]
-    result = ["STRING_LIT,\" long toi tan nat khi nhan ra toi \\r la gay \\ \",EOF"]
+    source= ["\"nothing \\r gonna \\n change \" my love \" \\\\ \" for \n you", "\"toi la Huy\""]
+    result = ["STRING_LIT,nothing gonna change my love \\\\ for \n you,EOF", "STRING_LIT,toi la Huy,EOF"]
 
     compare_results(source, result)
