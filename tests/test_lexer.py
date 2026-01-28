@@ -27,8 +27,8 @@ def test_lexer_keywords():
     compare_results(source, result)
 
 def test_lexer_float_literal():
-    source = ["0.0", "3.14", "-2.5", "1.23e4", "5.67E-2", "1.", ".5"]
-    result = ["FLOAT_LIT,0.0,EOF", "FLOAT_LIT,3.14,EOF", "FLOAT_LIT,-2.5,EOF", "FLOAT_LIT,1.23e4,EOF", "FLOAT_LIT,5.67E-2,EOF", "FLOAT_LIT,1.,EOF", "FLOAT_LIT,.5,EOF"]
+    source = ["0.0", "3.14", "-2.5", "1.23e4", "5.67E-2", "1.", ".5", "0e10", "0.e10", ".0e10", "1e10", "-1e10", ".123e4"]
+    result = ["FLOAT_LIT,0.0,EOF", "FLOAT_LIT,3.14,EOF", "FLOAT_LIT,-2.5,EOF", "FLOAT_LIT,1.23e4,EOF", "FLOAT_LIT,5.67E-2,EOF", "FLOAT_LIT,1.,EOF", "FLOAT_LIT,.5,EOF", "FLOAT_LIT,0e10,EOF", "FLOAT_LIT,0.e10,EOF", "FLOAT_LIT,.0e10,EOF", "FLOAT_LIT,1e10,EOF", "FLOAT_LIT,-1e10,EOF", "FLOAT_LIT,.123e4,EOF"]
 
     compare_results(source, result)
 
