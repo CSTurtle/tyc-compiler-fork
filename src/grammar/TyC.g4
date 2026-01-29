@@ -35,6 +35,12 @@ func_decl_stmt: (typ | 'void')? ID '(' (typ ID (',' typ ID)*)? ')' '{' stmt* '}'
 
 struct_decl_stmt: 'struct' ID '{' (typ ID ';')* '}' ';' ;
 
+struct_var_decl_stmt: ID ID ('=' '{' (expr (',' expr)*)? '}')';' ;
+
+struct_member_access: ID '.' ID;
+
+var_decl_stmt: (typ | 'auto') ID ('=' expr)? ';' ;
+
 stmt: if_stmt | while_stmt | for_stmt | switch_stmt | break_stmt | continue_stmt | return_stmt | expr_stmt | block_stmt | var_decl_stmt | member_decl_stmt | struct_decl_stmt | func_decl_stmt | assign_stmt;
 
 expr:   ('+' | '-')? (ID | INT_LIT | FLOAT_LIT ) 
@@ -43,14 +49,12 @@ expr:   ('+' | '-')? (ID | INT_LIT | FLOAT_LIT )
         | ('++' | '--')? (ID | INT_LIT) ('++' | '--')?
         | STRING_LIT
         | func_call
-        | member_access
+        | struct_member_access
         | '(' expr ')' ;
-
-member_access: ID '.' ID;
 
 func_call: ID '(' (expr (',' expr)*)? ')' ;
 
-assign_stmt: ID '=' expr | member_access '=' expr | ID '=' assign_stmt ';' ;
+assign_stmt: ID '=' expr | struct_member_access '=' expr | ID '=' assign_stmt ';' ;
 
 block_stmt: '{' stmt* '}' ;
 
@@ -74,13 +78,9 @@ expr_stmt: expr ';' ;
 
 case_stmt: 'case' expr ':' stmt ;
 
-var_decl_stmt: (typ | 'auto') ID ('=' expr)? ';';
-
 member_decl_stmt: typ ID ';';
 
-struct_decl_stmt: 'struct' ID '{' var_decl_stmt* '}' ';';
-
-
+// Lexer rules
 WS : [ \t\f\r\n]+ -> skip ; // skip spaces, tabs
 
 BLK_CMT: '/*' .*? '*/' -> skip ;
