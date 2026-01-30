@@ -33,64 +33,64 @@ decl: struct_decl_stmt | func_decl_stmt ;
 
 struct_name: ID;
 
-typ: 'int' | 'float' | 'string' | struct_name;
+typ: INT | FLOAT | STRING | struct_name;
 
-func_decl_stmt: (typ | 'void')? ID '(' (typ ID (',' typ ID)*)? ')' '{' stmt* '}' ;
+func_decl_stmt: (typ | VOID)? ID LPAREN (typ ID (COMMA typ ID)*)? RPAREN LBRACE stmt* RBRACE ;
 
-struct_decl_stmt: 'struct' struct_name '{' (typ ID ';')* '}' ';' ;
+struct_decl_stmt: STRUCT struct_name LBRACE (typ ID SEMI)* RBRACE SEMI ;
 
-struct_var_decl_stmt: struct_name ID ('=' '{' (expr (',' expr)*)? '}')? ';' ;
+struct_var_decl_stmt: struct_name ID (ASSIGN LBRACE (expr (COMMA expr)*)? RBRACE)? SEMI ;
 
 struct_ops: struct_assign | struct_member_access_expr ;
 
-struct_member_access_expr: <assoc=left> ID '.' ID;
+struct_member_access_expr: <assoc=left> ID DOT ID;
 
-struct_assign: struct_name '=' struct_name ;
+struct_assign: struct_name ASSIGN struct_name ;
 
 // EXPRESSIONS
 expr: (struct_member_access_expr)
-    | (<assoc=left> (ID | INT_LIT) ('++' | '--')?)
-    | (<assoc=right> ('++' | '--')? (ID | INT_LIT))
-    | (('+' | '-')? (ID | INT_LIT | FLOAT_LIT ))
-    | ((ID | INT_LIT | FLOAT_LIT) ('+' | '-' | '*' | '/' | '==' | '!=' | '<' | '<=' | '>' | '>=') (ID | INT_LIT | FLOAT_LIT))
-    | ((((ID | INT_LIT) ('%' | '&&' | '||')) | ('!')) (ID | INT_LIT) )
+    | (<assoc=left> (ID | INT_LIT) (INC | DEC)?)
+    | (<assoc=right> (INC | DEC)? (ID | INT_LIT))
+    | ((PLUS | MINUS)? (ID | INT_LIT | FLOAT_LIT ))
+    | ((ID | INT_LIT | FLOAT_LIT) (PLUS | MINUS | MULT | DIV | EQ | NEQ | LT | LTE | GT | GTE) (ID | INT_LIT | FLOAT_LIT))
+    | ((((ID | INT_LIT) (MOD | AND | OR)) | (NOT)) (ID | INT_LIT) )
     | (STRING_LIT)
     | (func_call_expr)
     | (asmt_expr)
     ;
 
-func_call_expr: ID '(' (expr (',' expr)*)? ')' ;
+func_call_expr: ID LPAREN (expr (COMMA expr)*)? RPAREN ;
 
-asmt_expr: <assoc=right> (ID | struct_member_access_expr) '=' expr ;
+asmt_expr: <assoc=right> (ID | struct_member_access_expr) ASSIGN expr ;
 
 // STATEMENTS
 stmt: var_decl_stmt | block_stmt | if_stmt | while_stmt | for_stmt | switch_stmt | break_stmt | continue_stmt | return_stmt | expr_stmt | struct_decl_stmt | func_decl_stmt;
 
-var_decl_stmt: (typ | 'auto') ID ('=' expr)? ';' ;
+var_decl_stmt: (typ | AUTO) ID (ASSIGN expr)? SEMI ;
 
-block_stmt: '{' stmt* '}' ;
+block_stmt: LBRACE stmt* RBRACE ;
 
-if_stmt: 'if' '(' expr ')' stmt ('else' stmt)? ;
+if_stmt: IF LPAREN expr RPAREN stmt (ELSE stmt)? ;
 
-while_stmt: 'while' '(' expr ')' stmt ;
+while_stmt: WHILE LPAREN expr RPAREN stmt ;
 
-for_stmt: 'for' '(' for_init? ';' expr? ';' update? ')' stmt ;
+for_stmt: FOR LPAREN for_init? SEMI expr? SEMI update? RPAREN stmt ;
 
 for_init: var_decl_stmt | asmt_expr ;
 
 update: asmt_expr | expr;
 
-switch_stmt: 'switch' '(' expr ')' '{' case_stmt* '}' ;
+switch_stmt: SWITCH LPAREN expr RPAREN LBRACE case_stmt* RBRACE ;
 
-case_stmt: 'case' expr ':' stmt ;
+case_stmt: CASE expr COLON stmt ;
 
-break_stmt: 'break' ';' ;
+break_stmt: BREAK SEMI ;
 
-continue_stmt: 'continue' ';' ;
+continue_stmt: CONTINUE SEMI ;
 
-return_stmt: 'return' expr? ';' ;
+return_stmt: RETURN expr? SEMI ;
 
-expr_stmt: expr ';' ;
+expr_stmt: expr SEMI ;
 
 // Lexer rules
 WS : [ \t\f\r\n]+ -> skip ; // skip spaces, tabs
@@ -99,13 +99,54 @@ BLK_CMT: '/*' .*? '*/' -> skip ;
 
 LINE_CMT: '//' ~('\n' | '\r')* -> skip ;
 
-KW: 'auto' | 'break' | 'case' | 'continue' | 'default' | 'else' | 'float' | 'for' | 'if' | 'int' | 'return' | 'string' | 'struct' | 'switch' | 'void' | 'while' ;
+// Keywords (must come before ID)
+AUTO: 'auto';
+BREAK: 'break';
+CASE: 'case';
+CONTINUE: 'continue';
+DEFAULT: 'default';
+ELSE: 'else';
+FLOAT: 'float';
+FOR: 'for';
+IF: 'if';
+INT: 'int';
+RETURN: 'return';
+STRING: 'string';
+STRUCT: 'struct';
+SWITCH: 'switch';
+VOID: 'void';
+WHILE: 'while';
 
 ID: [a-zA-Z_] [a-zA-Z0-9_]* ;
 
-OP: ('+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||' | '!' | '++' | '--' | '.' | '=') ;
+// Operators (longer operators first to avoid partial matches)
+INC: '++';
+DEC: '--';
+EQ: '==';
+NEQ: '!=';
+LTE: '<=';
+GTE: '>=';
+AND: '&&';
+OR: '||';
+PLUS: '+';
+MINUS: '-';
+MULT: '*';
+DIV: '/';
+MOD: '%';
+LT: '<';
+GT: '>';
+NOT: '!';
+DOT: '.';
+ASSIGN: '=';
 
-SEP: ('{' | '}' | '(' | ')' | ';' | ',' | ':') ;
+// Separators
+LBRACE: '{';
+RBRACE: '}';
+LPAREN: '(';
+RPAREN: ')';
+SEMI: ';';
+COMMA: ',';
+COLON: ':';
 
 INT_LIT: '0' | ('-'? [1-9] [0-9]*);
 
