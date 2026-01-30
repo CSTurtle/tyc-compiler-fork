@@ -25,36 +25,48 @@ options{
 }
 
 // TODO: Define grammar rules here
-program: decls+ EOF;
+program: decl+ EOF;
 
-decls: struct_decl_stmt | func_decl_stmt ;
+// BASICS
 
-typ: 'int' | 'float' | 'string' | ID;
+decl: struct_decl_stmt | func_decl_stmt ;
+
+struct_name: ID;
+
+typ: 'int' | 'float' | 'string' | struct_name;
 
 func_decl_stmt: (typ | 'void')? ID '(' (typ ID (',' typ ID)*)? ')' '{' stmt* '}' ;
 
-struct_decl_stmt: 'struct' ID '{' (typ ID ';')* '}' ';' ;
+struct_decl_stmt: 'struct' struct_name '{' (typ ID ';')* '}' ';' ;
 
-struct_var_decl_stmt: ID ID ('=' '{' (expr (',' expr)*)? '}')';' ;
+struct_var_decl_stmt: struct_name ID ('=' '{' (expr (',' expr)*)? '}')? ';' ;
 
-struct_member_access: ID '.' ID;
+struct_ops: struct_assign | struct_member_access_expr ;
+
+struct_member_access_expr: <assoc=left> ID '.' ID;
+
+struct_assign: struct_name '=' struct_name ;
+
+// EXPRESSIONS
+expr: (struct_member_access_expr)
+    | (<assoc=left> (ID | INT_LIT) ('++' | '--')?)
+    | (<assoc=right> ('++' | '--')? (ID | INT_LIT))
+    | (('+' | '-')? (ID | INT_LIT | FLOAT_LIT ))
+    | ((ID | INT_LIT | FLOAT_LIT) ('+' | '-' | '*' | '/' | '==' | '!=' | '<' | '<=' | '>' | '>=') (ID | INT_LIT | FLOAT_LIT))
+    | ((((ID | INT_LIT) ('%' | '&&' | '||')) | ('!')) (ID | INT_LIT) )
+    | (STRING_LIT)
+    | (func_call_expr)
+    | (asmt_expr)
+    ;
+
+func_call_expr: ID '(' (expr (',' expr)*)? ')' ;
+
+asmt_expr: <assoc=right> (ID | struct_member_access_expr) '=' expr ;
+
+// STATEMENTS
+stmt: var_decl_stmt | block_stmt | if_stmt | while_stmt | for_stmt | switch_stmt | break_stmt | continue_stmt | return_stmt | expr_stmt | struct_decl_stmt | func_decl_stmt;
 
 var_decl_stmt: (typ | 'auto') ID ('=' expr)? ';' ;
-
-stmt: if_stmt | while_stmt | for_stmt | switch_stmt | break_stmt | continue_stmt | return_stmt | expr_stmt | block_stmt | var_decl_stmt | member_decl_stmt | struct_decl_stmt | func_decl_stmt | assign_stmt;
-
-expr:   ('+' | '-')? (ID | INT_LIT | FLOAT_LIT ) 
-        | (ID | INT_LIT | FLOAT_LIT) ('+' | '-' | '*' | '/' | '==' | '!=' | '<' | '<=' | '>' | '>=') (ID | INT_LIT | FLOAT_LIT) 
-        | (ID | INT_LIT) ('%' | '&&' | '||') (ID | INT_LIT) 
-        | ('++' | '--')? (ID | INT_LIT) ('++' | '--')?
-        | STRING_LIT
-        | func_call
-        | struct_member_access
-        | '(' expr ')' ;
-
-func_call: ID '(' (expr (',' expr)*)? ')' ;
-
-assign_stmt: ID '=' expr | struct_member_access '=' expr | ID '=' assign_stmt ';' ;
 
 block_stmt: '{' stmt* '}' ;
 
@@ -62,11 +74,15 @@ if_stmt: 'if' '(' expr ')' stmt ('else' stmt)? ;
 
 while_stmt: 'while' '(' expr ')' stmt ;
 
-for_stmt: 'for' '(' for_init? ';' expr? ';' expr? ')' stmt ;
+for_stmt: 'for' '(' for_init? ';' expr? ';' update? ')' stmt ;
 
-for_init: (('int' | 'float' | 'string' | 'auto' | ID) ID ('=' expr)?) | expr ;
+for_init: var_decl_stmt | asmt_expr ;
+
+update: asmt_expr | expr;
 
 switch_stmt: 'switch' '(' expr ')' '{' case_stmt* '}' ;
+
+case_stmt: 'case' expr ':' stmt ;
 
 break_stmt: 'break' ';' ;
 
@@ -75,10 +91,6 @@ continue_stmt: 'continue' ';' ;
 return_stmt: 'return' expr? ';' ;
 
 expr_stmt: expr ';' ;
-
-case_stmt: 'case' expr ':' stmt ;
-
-member_decl_stmt: typ ID ';';
 
 // Lexer rules
 WS : [ \t\f\r\n]+ -> skip ; // skip spaces, tabs

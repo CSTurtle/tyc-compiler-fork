@@ -15,6 +15,6 @@ def compare_results(source):
 
 def test_parser_placeholder():
     """Placeholder test - replace with actual test cases"""
-    source = ["int x = 10;", "x = y = 5 ;", ]
+    source = ["void main() { x.y = -6; x++; x+y; printX(5+9); }"]
     # TODO: Add actual test assertions
     compare_results(source)
