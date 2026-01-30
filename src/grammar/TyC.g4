@@ -57,6 +57,7 @@ expr: (struct_member_access_expr)
     | (STRING_LIT)
     | (func_call_expr)
     | (asmt_expr)
+    | (LPAREN expr RPAREN)
     ;
 
 func_call_expr: ID LPAREN (expr (COMMA expr)*)? RPAREN ;
@@ -64,7 +65,7 @@ func_call_expr: ID LPAREN (expr (COMMA expr)*)? RPAREN ;
 asmt_expr: <assoc=right> (ID | struct_member_access_expr) ASSIGN expr ;
 
 // STATEMENTS
-stmt: var_decl_stmt | block_stmt | if_stmt | while_stmt | for_stmt | switch_stmt | break_stmt | continue_stmt | return_stmt | expr_stmt | struct_decl_stmt | func_decl_stmt;
+stmt: var_decl_stmt | block_stmt | if_stmt | while_stmt | for_stmt | switch_stmt | break_stmt | continue_stmt | return_stmt | expr_stmt | struct_decl_stmt | struct_var_decl_stmt | func_decl_stmt;
 
 var_decl_stmt: (typ | AUTO) ID (ASSIGN expr)? SEMI ;
 
@@ -74,15 +75,17 @@ if_stmt: IF LPAREN expr RPAREN stmt (ELSE stmt)? ;
 
 while_stmt: WHILE LPAREN expr RPAREN stmt ;
 
-for_stmt: FOR LPAREN for_init? SEMI expr? SEMI update? RPAREN stmt ;
+for_stmt: FOR LPAREN for_init? expr? SEMI update? RPAREN LBRACE stmt* RBRACE ;
 
-for_init: var_decl_stmt | asmt_expr ;
+for_init: var_decl_stmt | asmt_expr SEMI ;
 
 update: asmt_expr | expr;
 
-switch_stmt: SWITCH LPAREN expr RPAREN LBRACE case_stmt* RBRACE ;
+switch_stmt: SWITCH LPAREN expr RPAREN LBRACE (case_stmt* default_stmt)? RBRACE ;
 
-case_stmt: CASE expr COLON stmt ;
+case_stmt: CASE expr COLON stmt* break_stmt? ;
+
+default_stmt: DEFAULT COLON stmt* ;
 
 break_stmt: BREAK SEMI ;
 
@@ -148,9 +151,9 @@ SEMI: ';';
 COMMA: ',';
 COLON: ':';
 
-INT_LIT: '0' | ('-'? [1-9] [0-9]*);
+INT_LIT: '0' | ([1-9] [0-9]*);
 
-FLOAT_LIT: (((('0'? '.' [0-9]+) | ('0.' ([0-9]+)?) | ('-'? (([1-9] [0-9]* '.' ([0-9]+)?) | (([1-9] [0-9]*)? '.' [0-9]+)))) ([eE] [+-]? [1-9] [0-9]*)?) | (('0' | ('-'? [0-9]+)) [eE] [+-]? [1-9] [0-9]*)) ;
+FLOAT_LIT: (((('0'? '.' [0-9]+) | ('0.' ([0-9]+)?) | ((([1-9] [0-9]* '.' ([0-9]+)?) | (([1-9] [0-9]*)? '.' [0-9]+)))) ([eE] [+-]? [1-9] [0-9]*)?) | (('0' | ([0-9]+)) [eE] [+-]? [1-9] [0-9]*)) ;
 
 fragment ESC_SEQ: '\\' [bfrnt"\\] ; 
 
