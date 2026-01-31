@@ -6,37 +6,24 @@ TODO: Implement 100 test cases for lexer
 import pytest
 from tests.utils import Tokenizer
 
-def compare_results(source, expected_result):
-    for s, r in zip(source, expected_result):
-        tokenizer = Tokenizer(s)
-        print(tokenizer.get_tokens_as_string())
-        # TODO: Add actual test assertions
-        assert tokenizer.get_tokens_as_string() == r
-
 def test_lexer_comments():
     """Placeholder test - replace with actual test cases"""
-    source = ["// This is a \n placeholder \r test", "/* This is a block comment \n This is \r a block comment */"]
-    result = ["placeholder,test,<EOF>", "<EOF>"]
-
-    compare_results(source, result)
+    tokenizer = Tokenizer("// This is a \n placeholder \r test /* This is a block comment \n This is \r a block comment */")
+    assert tokenizer.get_tokens_as_string() == "placeholder,test,<EOF>"
 
 def test_lexer_keywords():
-    source = ["auto", "break", "case", "continue", "default", "else", "float", "for", "if", "int", "return", "string", "struct", "switch", "void", "while"]
-    result = ["auto,<EOF>", "break,<EOF>", "case,<EOF>", "continue,<EOF>", "default,<EOF>", "else,<EOF>", "float,<EOF>", "for,<EOF>", "if,<EOF>", "int,<EOF>", "return,<EOF>", "string,<EOF>", "struct,<EOF>", "switch,<EOF>", "void,<EOF>", "while,<EOF>"]
+    tokenizer = Tokenizer("auto break case continue default else float for if int return string struct switch void while")
 
-    compare_results(source, result)
+    assert tokenizer.get_tokens_as_string() == "auto,break,case,continue,default,else,float,for,if,int,return,string,struct,switch,void,while,<EOF>"
 
 def test_lexer_float_literal():
-    source = ["0.0", "3.14", "-2.5", "1.23e4", "5.67E-2", "1.", ".5", "0e10", "0.e10", ".0e10", "1e10", "-1e10", ".123e4"]
-    result = ["0.0,<EOF>", "3.14,<EOF>", "-,2.5,<EOF>", "1.23e4,<EOF>", "5.67E-2,<EOF>", "1.,<EOF>", ".5,<EOF>", "0e10,<EOF>", "0.e10,<EOF>", ".0e10,<EOF>", "1e10,<EOF>", "-,1e10,<EOF>", ".123e4,<EOF>"]
-
-    compare_results(source, result)
+    tokenizer = Tokenizer("0.0 3.14 -2.5 1.23e4 5.67E-2 1. .5 0e10 0.e10 .0e10 1e10 -1e10 .123e4")
+    assert tokenizer.get_tokens_as_string() == "0.0,3.14,-,2.5,1.23e4,5.67E-2,1.,.5,0e10,0.e10,.0e10,1e10,-,1e10,.123e4,<EOF>"
 
 def test_string_literal():
-    source= ["\"nothing \\r gonna \\n change \" my love \" \\\\ \" for \n you", "\"toi la Huy\""]
-    result = ["nothing gonna change my love \\\\ for \n you,EOF", "toi la Huy,EOF"]
+    tokenizer = Tokenizer("\"nothing \\r gonna \\n change \" my love \" \\\\ \" for \n you \"toi la Huy\"")
+    assert tokenizer.get_tokens_as_string() == "nothing gonna change my love \\\\ for \n you,toi la Huy,<EOF>"
 
-    compare_results(source, result)
 # ========== Simple Test Cases (10 types) ==========
 def test_keyword_auto():
     """1. Keyword"""
