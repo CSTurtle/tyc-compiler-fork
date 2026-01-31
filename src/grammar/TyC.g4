@@ -25,7 +25,7 @@ options{
 }
 
 // TODO: Define grammar rules here
-program: decl+ EOF;
+program: decl* EOF;
 
 // BASICS
 
@@ -75,13 +75,13 @@ if_stmt: IF LPAREN expr RPAREN stmt (ELSE stmt)? ;
 
 while_stmt: WHILE LPAREN expr RPAREN stmt ;
 
-for_stmt: FOR LPAREN for_init? expr? SEMI update? RPAREN LBRACE stmt* RBRACE ;
+for_stmt: FOR LPAREN for_init? expr? SEMI update? RPAREN ( (LBRACE? stmt RBRACE?) | (LBRACE stmt stmt+ RBRACE) ) ;
 
 for_init: var_decl_stmt | asmt_expr SEMI ;
 
 update: asmt_expr | expr;
 
-switch_stmt: SWITCH LPAREN expr RPAREN LBRACE (case_stmt* default_stmt)? RBRACE ;
+switch_stmt: SWITCH LPAREN expr RPAREN LBRACE (case_stmt* default_stmt?) RBRACE ;
 
 case_stmt: CASE expr COLON stmt* break_stmt? ;
 
@@ -119,6 +119,7 @@ STRUCT: 'struct';
 SWITCH: 'switch';
 VOID: 'void';
 WHILE: 'while';
+// END_OF_FILE: '<EOF>';
 
 ID: [a-zA-Z_] [a-zA-Z0-9_]* ;
 
