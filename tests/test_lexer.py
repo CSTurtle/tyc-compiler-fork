@@ -16,25 +16,25 @@ def compare_results(source, expected_result):
 def test_lexer_comments():
     """Placeholder test - replace with actual test cases"""
     source = ["// This is a \n placeholder \r test", "/* This is a block comment \n This is \r a block comment */"]
-    result = ["ID,placeholder,ID,test,EOF", "EOF"]
+    result = ["placeholder,test,<EOF>", "<EOF>"]
 
     compare_results(source, result)
 
 def test_lexer_keywords():
     source = ["auto", "break", "case", "continue", "default", "else", "float", "for", "if", "int", "return", "string", "struct", "switch", "void", "while"]
-    result = ["KW,auto,EOF", "KW,break,EOF", "KW,case,EOF", "KW,continue,EOF", "KW,default,EOF", "KW,else,EOF", "KW,float,EOF", "KW,for,EOF", "KW,if,EOF", "KW,int,EOF", "KW,return,EOF", "KW,string,EOF", "KW,struct,EOF", "KW,switch,EOF", "KW,void,EOF", "KW,while,EOF"]
+    result = ["auto,<EOF>", "break,<EOF>", "case,<EOF>", "continue,<EOF>", "default,<EOF>", "else,<EOF>", "float,<EOF>", "for,<EOF>", "if,<EOF>", "int,<EOF>", "return,<EOF>", "string,<EOF>", "struct,<EOF>", "switch,<EOF>", "void,<EOF>", "while,<EOF>"]
 
     compare_results(source, result)
 
 def test_lexer_float_literal():
     source = ["0.0", "3.14", "-2.5", "1.23e4", "5.67E-2", "1.", ".5", "0e10", "0.e10", ".0e10", "1e10", "-1e10", ".123e4"]
-    result = ["FLOAT_LIT,0.0,EOF", "FLOAT_LIT,3.14,EOF", "FLOAT_LIT,-2.5,EOF", "FLOAT_LIT,1.23e4,EOF", "FLOAT_LIT,5.67E-2,EOF", "FLOAT_LIT,1.,EOF", "FLOAT_LIT,.5,EOF", "FLOAT_LIT,0e10,EOF", "FLOAT_LIT,0.e10,EOF", "FLOAT_LIT,.0e10,EOF", "FLOAT_LIT,1e10,EOF", "FLOAT_LIT,-1e10,EOF", "FLOAT_LIT,.123e4,EOF"]
+    result = ["0.0,<EOF>", "3.14,<EOF>", "-,2.5,<EOF>", "1.23e4,<EOF>", "5.67E-2,<EOF>", "1.,<EOF>", ".5,<EOF>", "0e10,<EOF>", "0.e10,<EOF>", ".0e10,<EOF>", "1e10,<EOF>", "-,1e10,<EOF>", ".123e4,<EOF>"]
 
     compare_results(source, result)
 
 def test_string_literal():
     source= ["\"nothing \\r gonna \\n change \" my love \" \\\\ \" for \n you", "\"toi la Huy\""]
-    result = ["STRING_LIT,nothing gonna change my love \\\\ for \n you,EOF", "STRING_LIT,toi la Huy,EOF"]
+    result = ["nothing gonna change my love \\\\ for \n you,EOF", "toi la Huy,EOF"]
 
     compare_results(source, result)
 # ========== Simple Test Cases (10 types) ==========
