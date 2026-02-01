@@ -69,3 +69,8 @@ def test_assignment_simple():
     """10. Assignment statement"""
     source = "void main() { int x; x = 5; }"
     assert Parser(source).parse() == "success"
+
+def test_member_access_simple():
+    """11. Member access statement"""
+    source = "void main() { -calc(5); --m.x;}"
+    assert Parser(source).parse() == "success"

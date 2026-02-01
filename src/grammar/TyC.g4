@@ -49,9 +49,9 @@ struct_assign: struct_name ASSIGN struct_name ;
 
 // EXPRESSIONS
 expr: (struct_member_access_expr)
-    | (<assoc=left> (ID | INT_LIT) (INC | DEC)?)
-    | (<assoc=right> (INC | DEC)? (ID | INT_LIT))
-    | ((PLUS | MINUS)? (ID | INT_LIT | FLOAT_LIT ))
+    | (<assoc=left> (ID | INT_LIT | struct_member_access_expr) (INC | DEC)?)
+    | (<assoc=right> (INC | DEC)? (ID | INT_LIT | struct_member_access_expr))
+    | ((PLUS | MINUS)? (ID | INT_LIT | FLOAT_LIT | struct_member_access_expr | func_call_expr))
     | ((ID | INT_LIT | FLOAT_LIT) (PLUS | MINUS | MULT | DIV | EQ | NEQ | LT | LTE | GT | GTE) (ID | INT_LIT | FLOAT_LIT))
     | ((((ID | INT_LIT) (MOD | AND | OR)) | (NOT)) (ID | INT_LIT) )
     | (STRING_LIT)
