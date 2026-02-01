@@ -41,7 +41,7 @@ struct_decl_stmt: STRUCT ID LBRACE (explicit_type ID SEMI)* RBRACE SEMI ;
 
 struct_var_decl_stmt: ID ID (ASSIGN LBRACE (expr (COMMA expr)*)? RBRACE)? SEMI ;
 
-struct_ops: struct_assign | struct_member_access_expr ;
+// struct_ops: struct_assign | struct_member_access_expr ;
 
 struct_member_access_expr: <assoc=left> ID DOT ID;
 
@@ -78,7 +78,7 @@ expr: expr DOT ID
 
 struct_literal_expr: LBRACE (expr (COMMA expr)*)? RBRACE;
 
-func_call_expr: ID LPAREN (expr (COMMA expr)*)? RPAREN ;
+// func_call_expr: ID LPAREN (expr (COMMA expr)*)? RPAREN ;
 
 asmt_expr: <assoc=right> (ID | struct_member_access_expr) ASSIGN expr ;
 
@@ -93,7 +93,7 @@ if_stmt: IF LPAREN expr RPAREN stmt (ELSE stmt)? ;
 
 while_stmt: WHILE LPAREN expr RPAREN stmt ;
 
-for_stmt: FOR LPAREN for_init? SEMI expr? SEMI update? RPAREN ( (LBRACE? stmt RBRACE?) | (LBRACE stmt stmt+ RBRACE) ) ;
+for_stmt: FOR LPAREN for_init? SEMI expr? SEMI update? RPAREN ( (LBRACE stmt RBRACE) | (stmt) | (LBRACE stmt stmt+ RBRACE) ) ;
 
 for_init: ((explicit_type | AUTO) ID (ASSIGN expr)?) | asmt_expr ;
 
