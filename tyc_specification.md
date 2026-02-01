@@ -216,6 +216,8 @@ Float literals are of type **float**.
 \\   backslash (ASCII 92)
 ```
 
+Only these escape sequences are valid. Hex escapes such as `\x01` or `\x80` are not supported and will cause an `ILLEGAL_ESCAPE` error; unprintable and extended ASCII characters may be written directly in the source when the editor allows.
+
 **String Token Processing:**
 - When a valid string literal is recognized, the lexer automatically removes (strips) the enclosing double quotes from both ends. The token value contains only the string content without the quotes.
 - For error cases (`ILLEGAL_ESCAPE` and `UNCLOSE_STRING`), the lexer removes the opening double quote, but the error message includes the problematic content.
@@ -227,8 +229,6 @@ The lexer checks for errors in the following order (first match wins):
 2. **Unclosed strings** are detected if the string literal is not closed before encountering a newline, carriage return, or end of file.
 3. If neither error occurs, a **valid string literal** is recognized.
 
-For example, `"Hello \a World"` will be detected as an `ILLEGAL_ESCAPE` error because `\a` is an illegal escape sequence (detected before checking if the string is closed).
-
 It is a compile-time error for:
 - A newline (`\n`) or carriage return (`\r`) character to appear directly (unescaped) inside a string literal.
 - An EOF character to appear inside a string literal (i.e., the string literal is not closed before end of file).
@@ -239,8 +239,6 @@ The following are valid examples of string literals:
 "This is a string containing tab \t"
 "He asked me: \"Where is John?\""
 ""
-"String with unprintable: \x01"  // Character with code 1 can appear directly
-"Extended ASCII: \x80\xFF"        // Extended ASCII characters (128-255) are allowed
 ```
 
 A string literal has a type of **string**.
