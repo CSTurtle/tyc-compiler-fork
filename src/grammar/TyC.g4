@@ -31,34 +31,52 @@ program: decl* EOF;
 
 decl: struct_decl_stmt | func_decl_stmt ;
 
-struct_name: ID;
+explicit_type: INT | FLOAT | STRING | ID; // ID for struct types
 
-typ: INT | FLOAT | STRING | struct_name;
+literal_type: INT_LIT | FLOAT_LIT | STRING_LIT;
 
-func_decl_stmt: (typ | VOID)? ID LPAREN (typ ID (COMMA typ ID)*)? RPAREN LBRACE stmt* RBRACE ;
+func_decl_stmt: (explicit_type | VOID)? ID LPAREN (explicit_type ID (COMMA explicit_type ID)*)? RPAREN LBRACE stmt* RBRACE ;
 
-struct_decl_stmt: STRUCT struct_name LBRACE (typ ID SEMI)* RBRACE SEMI ;
+struct_decl_stmt: STRUCT ID LBRACE (explicit_type ID SEMI)* RBRACE SEMI ;
 
-struct_var_decl_stmt: struct_name ID (ASSIGN LBRACE (expr (COMMA expr)*)? RBRACE)? SEMI ;
+struct_var_decl_stmt: ID ID (ASSIGN LBRACE (expr (COMMA expr)*)? RBRACE)? SEMI ;
 
 struct_ops: struct_assign | struct_member_access_expr ;
 
 struct_member_access_expr: <assoc=left> ID DOT ID;
 
-struct_assign: struct_name ASSIGN struct_name ;
+struct_assign: ID ASSIGN ID ;
 
 // EXPRESSIONS
-expr: (struct_member_access_expr)
-    | (<assoc=left> (ID | INT_LIT | struct_member_access_expr) (INC | DEC)?)
-    | (<assoc=right> (INC | DEC)? (ID | INT_LIT | struct_member_access_expr))
-    | ((PLUS | MINUS)? (ID | INT_LIT | FLOAT_LIT | struct_member_access_expr | func_call_expr))
-    | ((ID | INT_LIT | FLOAT_LIT) (PLUS | MINUS | MULT | DIV | EQ | NEQ | LT | LTE | GT | GTE) (ID | INT_LIT | FLOAT_LIT))
-    | ((((ID | INT_LIT) (MOD | AND | OR)) | (NOT)) (ID | INT_LIT) )
-    | (STRING_LIT)
-    | (func_call_expr)
-    | (asmt_expr)
-    | (LPAREN expr RPAREN)
+expr: expr DOT ID
+    | expr (INC | DEC)
+    | <assoc=right> (INC | DEC) expr
+    | <assoc=right> (PLUS | MINUS | NOT) expr
+    | expr (MULT | DIV | MOD) expr
+    | expr (PLUS | MINUS) expr
+    | expr (LT | LTE | GT | GTE) expr
+    | expr (EQ | NEQ) expr
+    | expr AND expr
+    | expr OR expr
+    | <assoc=right> expr ASSIGN expr
+    | ID LPAREN (expr (COMMA expr)*)? RPAREN
+    | LPAREN expr RPAREN
+    | struct_literal_expr
+    | ID
+    | literal_type
+    // (<assoc=left> (ID | INT_LIT | struct_member_access_expr) (INC | DEC)?)
+    // (<assoc=right> (INC | DEC)? (ID | INT_LIT | struct_member_access_expr))
+    // ((PLUS | MINUS)? (ID | INT_LIT | FLOAT_LIT | struct_member_access_expr | func_call_expr))
+    // | ((ID | INT_LIT | FLOAT_LIT) (PLUS | MINUS | MULT | DIV | EQ | NEQ | LT | LTE | GT | GTE) (ID | INT_LIT | FLOAT_LIT))
+    // | ((((ID | INT_LIT) (MOD | AND | OR)) | (NOT)) (ID | INT_LIT) )
+    // | (STRING_LIT)
+    // | (func_call_expr)
+    // | (asmt_expr)
+    // | (LPAREN expr RPAREN)
+    // | (struct_literal_expr)
     ;
+
+struct_literal_expr: LBRACE (expr (COMMA expr)*)? RBRACE;
 
 func_call_expr: ID LPAREN (expr (COMMA expr)*)? RPAREN ;
 
@@ -67,7 +85,7 @@ asmt_expr: <assoc=right> (ID | struct_member_access_expr) ASSIGN expr ;
 // STATEMENTS
 stmt: var_decl_stmt | block_stmt | if_stmt | while_stmt | for_stmt | switch_stmt | break_stmt | continue_stmt | return_stmt | expr_stmt | struct_decl_stmt | struct_var_decl_stmt | func_decl_stmt;
 
-var_decl_stmt: (typ | AUTO) ID (ASSIGN expr)? SEMI ;
+var_decl_stmt: (explicit_type | AUTO) ID (ASSIGN expr)? SEMI ;
 
 block_stmt: LBRACE stmt* RBRACE ;
 
@@ -75,17 +93,20 @@ if_stmt: IF LPAREN expr RPAREN stmt (ELSE stmt)? ;
 
 while_stmt: WHILE LPAREN expr RPAREN stmt ;
 
-for_stmt: FOR LPAREN for_init? expr? SEMI update? RPAREN ( (LBRACE? stmt RBRACE?) | (LBRACE stmt stmt+ RBRACE) ) ;
+for_stmt: FOR LPAREN for_init? SEMI expr? SEMI update? RPAREN ( (LBRACE? stmt RBRACE?) | (LBRACE stmt stmt+ RBRACE) ) ;
 
-for_init: var_decl_stmt | asmt_expr SEMI ;
+for_init: ((explicit_type | AUTO) ID (ASSIGN expr)?) | asmt_expr ;
 
 update: asmt_expr | expr;
 
-switch_stmt: SWITCH LPAREN expr RPAREN LBRACE (case_stmt* default_stmt?) RBRACE ;
+switch_stmt: SWITCH LPAREN expr RPAREN LBRACE switchBody RBRACE;
 
-case_stmt: CASE expr COLON stmt* break_stmt? ;
+switchBody: switchLabel*;
 
-default_stmt: DEFAULT COLON stmt* ;
+switchLabel: 
+    CASE expr COLON stmt*
+    | DEFAULT COLON stmt*
+    ;
 
 break_stmt: BREAK SEMI ;
 

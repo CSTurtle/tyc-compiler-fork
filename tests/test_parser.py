@@ -61,7 +61,7 @@ def test_for_simple():
 
 def test_switch_simple():
     """9. Switch statement"""
-    source = "void main() { switch (1) { case 1: printInt(1); break; } }"
+    source = "void main() { switch (1) { case 1: printInt(1); default: printInt(2); break; } }"
     assert Parser(source).parse() == "success"
 
 
@@ -73,4 +73,19 @@ def test_assignment_simple():
 def test_member_access_simple():
     """11. Member access statement"""
     source = "void main() { -calc(5); --m.x;}"
+    assert Parser(source).parse() == "success"
+
+def test_struct_literal_simple():
+    """12. Struct literal statement"""
+    source = "void main() { Point p = {funcCall(1,2), {3, 4}, 1, xyz}; }"
+    assert Parser(source).parse() == "success"
+
+def test_hex_escape():
+    """13. Hex escape sequence"""
+    source = "void main() { \"\\x12\"; }"
+    assert Parser(source).parse() == "error"
+
+def test_skip_for_init():
+    """14. Skip for init"""
+    source = "void main() { for(  ;i < 10; i=1) { m.x=g-1; if(i==0) break;} }"
     assert Parser(source).parse() == "success"
