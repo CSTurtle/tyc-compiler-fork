@@ -140,7 +140,6 @@ STRUCT: 'struct';
 SWITCH: 'switch';
 VOID: 'void';
 WHILE: 'while';
-// END_OF_FILE: '<EOF>';
 
 ID: [a-zA-Z_] [a-zA-Z0-9_]* ;
 
@@ -177,12 +176,15 @@ INT_LIT: '0' | ([1-9] [0-9]*);
 
 FLOAT_LIT: (((('0'? '.' [0-9]+) | ('0.' ([0-9]+)?) | ((([1-9] [0-9]* '.' ([0-9]+)?) | (([1-9] [0-9]*)? '.' [0-9]+)))) ([eE] [+-]? [1-9] [0-9]*)?) | (('0' | ([0-9]+)) [eE] [+-]? [1-9] [0-9]*)) ;
 
-fragment ESC_SEQ: '\\' [bfrnt"\\] ; 
+fragment STR_TOKEN: ~[\n\r\\"] | ESC_SEQ ; // token that can be in a string literal
+fragment ESC_SEQ: '\\' [bfrnt"\\] ; // Removed 'n' - \n is now illegal
+fragment ESC_ILLEGAL: '\\' ~[bfrnt"\\] ; // Updated to match ESC_SEQ (added 'n' to illegal set)
 
-STRING_LIT: '"' ( (ESC_SEQ) | (~[\\\n\r]) )*? '"' { self.text = self.text[1:-1] } ; // exclude '\\' so that if the string does not match any legal escape sequence, anything starts with '\\' will be treated as illegal escape
+STRING_LIT: '"' STR_TOKEN* '"' { self.text = self.text[1:-1] } ; // exclude '\\' so that if the string does not match any legal escape sequence, anything starts with '\\' will be treated as illegal escape
+// ( (ESC_SEQ) | (~["\\\n\r]) )* or ( (ESC_SEQ) | (~[\\\n\r]) )*? both are correct (test_2) -> not allow matching double-quote in the string, if matching a second double-quote means matching the end of the string
 
-ILLEGAL_ESCAPE: '"' ( ESC_SEQ | ~["\\\n\r] )*? '\\' ~[bfrnt"\\] { self.text = self.text[1:] } ;
+ILLEGAL_ESCAPE: '"' STR_TOKEN* ESC_ILLEGAL { self.text = self.text[1:] } ;
 
-UNCLOSE_STRING: '"' ( ESC_SEQ | ~["\\\n\r] )*? ('\r' | '\n' | EOF) { self.text = self.text[1:] } ;
+UNCLOSE_STRING: '"' STR_TOKEN* ('\r' | '\n' | EOF) { self.text = self.text[1:] } ;
 
 ERROR_CHAR: . ;

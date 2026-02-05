@@ -21,7 +21,7 @@ def test_lexer_float_literal():
     assert tokenizer.get_tokens_as_string() == "0.0,3.14,-,2.5,1.23e4,5.67E-2,1.,.5,0e10,0.e10,.0e10,1e10,-,1e10,.123e4,<EOF>"
 
 def test_string_literal():
-    tokenizer = Tokenizer("\"nothing \\r gonna \\n change \" my love \" \\\\ \" for \n you \"toi la Huy\"")
+    tokenizer = Tokenizer("\"test1 test2 \\n test3\"")
     assert tokenizer.get_tokens_as_string() == "nothing gonna change my love \\\\ for \n you,toi la Huy,<EOF>"
 
 # ========== Simple Test Cases (10 types) ==========
@@ -83,3 +83,13 @@ def test_complex_expression():
     """10. Complex: variable declaration"""
     tokenizer = Tokenizer("auto x = 5 + 3 * 2;")
     assert tokenizer.get_tokens_as_string() == "auto,x,=,5,+,3,*,2,;,<EOF>"
+
+def test_1():
+    tokenizer = Tokenizer("\"test1 test2 \r test3 \"test4")
+    assert (
+        tokenizer.get_tokens_as_string() == "Illegal Escape In String: test1 test2 "
+    )
+
+def test_2():
+    tokenizer = Tokenizer("\"test1 test2 \" test3 \"test4")
+    assert tokenizer.get_tokens_as_string() == "test1 test2 ,test3 ,test4,<EOF>"

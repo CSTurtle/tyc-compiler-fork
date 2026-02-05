@@ -89,3 +89,7 @@ def test_skip_for_init():
     """14. Skip for init"""
     source = "void main() { for(  ;i < 10; i=1) { m.x=g-1; if(i==0) break;} }"
     assert Parser(source).parse() == "success"
+
+def test_1():
+    source = "void main() { a++.c; }"
+    assert Parser(source).parse() == "error"
