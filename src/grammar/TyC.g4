@@ -172,19 +172,20 @@ SEMI: ';';
 COMMA: ',';
 COLON: ':';
 
-INT_LIT: '0' | ([1-9] [0-9]*);
+INT_LIT: [0-9]+;
+// '0' | ([1-9] [0-9]*);
 
 FLOAT_LIT: (((('0'? '.' [0-9]+) | ('0.' ([0-9]+)?) | ((([1-9] [0-9]* '.' ([0-9]+)?) | (([1-9] [0-9]*)? '.' [0-9]+)))) ([eE] [+-]? [1-9] [0-9]*)?) | (('0' | ([0-9]+)) [eE] [+-]? [1-9] [0-9]*)) ;
 
-fragment STR_TOKEN: ~[\n\r\\"] | ESC_SEQ ; // token that can be in a string literal
-fragment ESC_SEQ: '\\' [bfrnt"\\] ; // Removed 'n' - \n is now illegal
+fragment ESC_SEQ: '\\' [bft"\\] ; // Removed 'n' - \n is now illegal
+fragment STR_CHAR: ~[\n\r\\"] | ESC_SEQ ; // token that can be in a string literal; exclude '\' so that if the string does not match any legal escape sequence, anything starts with '\' will be treated as illegal escape
 fragment ESC_ILLEGAL: '\\' ~[bfrnt"\\] ; // Updated to match ESC_SEQ (added 'n' to illegal set)
 
-STRING_LIT: '"' STR_TOKEN* '"' { self.text = self.text[1:-1] } ; // exclude '\\' so that if the string does not match any legal escape sequence, anything starts with '\\' will be treated as illegal escape
+STRING_LIT: '"' STR_CHAR* '"' { self.text = self.text[1:-1] } ;
 // ( (ESC_SEQ) | (~["\\\n\r]) )* or ( (ESC_SEQ) | (~[\\\n\r]) )*? both are correct (test_2) -> not allow matching double-quote in the string, if matching a second double-quote means matching the end of the string
 
-ILLEGAL_ESCAPE: '"' STR_TOKEN* ESC_ILLEGAL { self.text = self.text[1:] } ;
+ILLEGAL_ESCAPE: '"' STR_CHAR* ESC_ILLEGAL { self.text = self.text[1:] } ;
 
-UNCLOSE_STRING: '"' STR_TOKEN* ('\r' | '\n' | EOF) { self.text = self.text[1:] } ;
+UNCLOSE_STRING: '"' STR_CHAR* '\\'? ('\r' | '\n' | '\\' [nr] | EOF) { self.text = self.text[1:] } ;
 
 ERROR_CHAR: . ;

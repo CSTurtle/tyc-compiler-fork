@@ -85,11 +85,11 @@ def test_complex_expression():
     assert tokenizer.get_tokens_as_string() == "auto,x,=,5,+,3,*,2,;,<EOF>"
 
 def test_1():
-    tokenizer = Tokenizer("\"test1 test2 \r test3 \"test4")
+    tokenizer = Tokenizer("\"test1 test2 \\r test3 \"test4")
     assert (
         tokenizer.get_tokens_as_string() == "Illegal Escape In String: test1 test2 "
     )
 
 def test_2():
-    tokenizer = Tokenizer("\"test1 test2 \" test3 \"test4")
-    assert tokenizer.get_tokens_as_string() == "test1 test2 ,test3 ,test4,<EOF>"
+    tokenizer = Tokenizer("\"test1 test2\" test3 \"test4")
+    assert tokenizer.get_tokens_as_string() == "test1 test2,test3,Unclosed String: test4"
