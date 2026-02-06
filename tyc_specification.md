@@ -543,7 +543,7 @@ The order of precedence for operators is listed from highest to lowest:
 | **Operator** | **Associativity** |
 |--------------|-------------------|
 | `.` (member access) | left |
-| `++`, `--` (postfix) | left |
+| `++`, `--` (postfix), `()` (function call) | left |
 | `++`, `--` (prefix) | right |
 | `!`, `-` (unary), `+` (unary) | right |
 | `*`, `/`, `%` | left |
