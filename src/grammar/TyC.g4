@@ -59,7 +59,7 @@ expr: expr DOT ID
     | expr AND expr
     | expr OR expr
     | <assoc=right> expr ASSIGN expr
-    | ID LPAREN (expr (COMMA expr)*)? RPAREN
+    | func_call_expr
     | LPAREN expr RPAREN
     | struct_literal_expr
     | ID
@@ -78,7 +78,7 @@ expr: expr DOT ID
 
 struct_literal_expr: LBRACE (expr (COMMA expr)*)? RBRACE;
 
-// func_call_expr: ID LPAREN (expr (COMMA expr)*)? RPAREN ;
+func_call_expr: ID LPAREN (expr (COMMA expr)*)? RPAREN ;
 
 asmt_expr: <assoc=right> (ID | struct_member_access_expr) ASSIGN expr ;
 
@@ -191,15 +191,24 @@ FLOAT_LIT:  ((([0-9]+ '.' [0-9]*) | ('.' [0-9]+)) EXP?)
             | ([0-9]+ EXP) 
             ;
 
-fragment ESC_SEQ: '\\' [bft"\\] ; // Removed 'n' - \n is now illegal
-fragment STR_CHAR: ~[\n\r\\"] | ESC_SEQ ; // token that can be in a string literal; exclude '\' so that if the string does not match any legal escape sequence, anything starts with '\' will be treated as illegal escape
-fragment ESC_ILLEGAL: '\\' ~[bfrnt"\\] ; // Updated to match ESC_SEQ (added 'n' to illegal set)
+fragment ESC_SEQ: '\\' [bfrnt"\\] ; // Removed 'n' - \n is now illegal
+fragment STR_CHAR: ~[\n\\"] | ESC_SEQ ; // token that can be in a string literal; exclude '\' so that if the string does not match any legal escape sequence, anything starts with '\' will be treated as illegal escape; '\r' not followed by '\n' is allowed
+fragment ESC_ILLEGAL: '\\' ~[bfrnt"\\\n\r] ; // Updated to match ESC_SEQ (added 'n' to illegal set)
 
 STRING_LIT: '"' STR_CHAR* '"' { self.text = self.text[1:-1] } ;
 // ( (ESC_SEQ) | (~["\\\n\r]) )* or ( (ESC_SEQ) | (~[\\\n\r]) )*? both are correct (test_2) -> not allow matching double-quote in the string, if matching a second double-quote means matching the end of the string
 
 ILLEGAL_ESCAPE: '"' STR_CHAR* ESC_ILLEGAL { self.text = self.text[1:] } ;
 
-UNCLOSE_STRING: '"' STR_CHAR* '\\'? ('\r' | '\n' | '\\' [nr] | EOF) { self.text = self.text[1:] } ;
+UNCLOSE_STRING: '"' STR_CHAR* '\\'? ('\r\n' | '\n' | EOF) { self.text = self.text[1:] } ;
+
+/* UNCLOSE_STRING: '"' STR_CHAR*  '\\'? ('\n' | '\r\n' | EOF) {
+    if self.text[-1] == '\n' and self.text[-2] == '\r':
+        raise UncloseString(self.text[1:-2])
+    elif self.text[-1] == '\n':
+        raise UncloseString(self.text[1:-1])
+    else:
+        raise UncloseString(self.text[1:])
+}; */
 
 ERROR_CHAR: . ;
