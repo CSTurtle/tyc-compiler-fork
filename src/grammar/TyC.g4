@@ -83,7 +83,17 @@ struct_literal_expr: LBRACE (expr (COMMA expr)*)? RBRACE;
 asmt_expr: <assoc=right> (ID | struct_member_access_expr) ASSIGN expr ;
 
 // STATEMENTS
-stmt: var_decl_stmt | block_stmt | if_stmt | while_stmt | for_stmt | switch_stmt | break_stmt | continue_stmt | return_stmt | expr_stmt | struct_decl_stmt | struct_var_decl_stmt | func_decl_stmt;
+stmt: var_decl_stmt 
+    | block_stmt 
+    | if_stmt 
+    | while_stmt 
+    | for_stmt 
+    | switch_stmt 
+    | break_stmt 
+    | continue_stmt 
+    | return_stmt 
+    | expr_stmt 
+    ;
 
 var_decl_stmt: (explicit_type | AUTO) ID (ASSIGN expr)? SEMI ;
 
@@ -93,7 +103,7 @@ if_stmt: IF LPAREN expr RPAREN stmt (ELSE stmt)? ;
 
 while_stmt: WHILE LPAREN expr RPAREN stmt ;
 
-for_stmt: FOR LPAREN for_init? SEMI expr? SEMI update? RPAREN ( (LBRACE stmt RBRACE) | (stmt) | (LBRACE stmt stmt+ RBRACE) ) ;
+for_stmt: FOR LPAREN for_init? SEMI expr? SEMI update? RPAREN stmt ;
 
 for_init: ((explicit_type | AUTO) ID (ASSIGN expr)?) | asmt_expr ;
 
@@ -175,7 +185,11 @@ COLON: ':';
 INT_LIT: [0-9]+;
 // '0' | ([1-9] [0-9]*);
 
-FLOAT_LIT: (((('0'? '.' [0-9]+) | ('0.' ([0-9]+)?) | ((([1-9] [0-9]* '.' ([0-9]+)?) | (([1-9] [0-9]*)? '.' [0-9]+)))) ([eE] [+-]? [1-9] [0-9]*)?) | (('0' | ([0-9]+)) [eE] [+-]? [1-9] [0-9]*)) ;
+fragment EXP: [eE] [+-]? [0-9]+ ;
+
+FLOAT_LIT:  ((([0-9]+ '.' [0-9]*) | ('.' [0-9]+)) EXP?)
+            | ([0-9]+ EXP) 
+            ;
 
 fragment ESC_SEQ: '\\' [bft"\\] ; // Removed 'n' - \n is now illegal
 fragment STR_CHAR: ~[\n\r\\"] | ESC_SEQ ; // token that can be in a string literal; exclude '\' so that if the string does not match any legal escape sequence, anything starts with '\' will be treated as illegal escape
